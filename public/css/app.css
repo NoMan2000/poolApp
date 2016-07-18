@@ -5,3 +5,6 @@
 .hide {
     display:none !important;
 }
+#editPlayerForm {
+    padding:1.5rem;
+}

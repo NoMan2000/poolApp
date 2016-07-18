@@ -1,5 +1,5 @@
 (function indexJS() {
-   'use strict';
+    'use strict';
     var gamesDB = new PouchDB('games'),
         totalGames = 0,
         totalPlayers = 0,
@@ -7,7 +7,6 @@
         gamesObj,
         playersObj,
         rev,
-
         /**
          * Get a random floating point number between `min` and `max`.
          *
@@ -70,6 +69,78 @@
                     $("#totalPlayers").html(totalPlayers);
                 }
                 return resp;
+            });
+        },
+        /**
+         * This is an inefficient solution, but for demo purposes,
+         * whenever a CRUD operation is performed on the database, this
+         * will empty the DOM and repopulate it with the new values.
+         */
+        refreshAll = function refreshAll() {
+            getPlayersAndGames().then(function (resp) {
+                $("#playerList").empty();
+                $("#gameList").empty();
+            }).then(addUserTemplateToDom).then(addGamesTemplateToDom);
+        },
+        /**
+         * Mildly naive approach, you could use a filter and return each element
+         * in the player position to get the largest of the data-ids.
+         * @param e
+         */
+        addPlayer = function addPlayer(e) {
+            e.preventDefault();
+            var firstName = e.firstName,
+                lastName = e.lastName;
+            gamesDB.get('games').then(function (resp) {
+                var len = resp.players.length - 1,
+                    id = resp.players[len].id + 1,
+                    player = {
+                        id: id,
+                        firstName: firstName,
+                        lastName: lastName,
+                        totalGames: 0,
+                        gamesWon: 0,
+                        gamesLost: 0
+                    };
+                resp.players.push(player);
+
+                return gamesDB.put(resp)
+                    .then(refreshAll);
+            });
+        },
+        /**
+         * Pass in the data-id and remove the player by that value
+         * @param id
+         */
+        removePlayer = function removePlayer(e) {
+            e.preventDefault();
+            var removePlayer;
+            // var id = Number(id);
+            gamesDB.get('games').then(function (resp) {
+                resp.players.forEach(function (value, index) {
+                    if (value.id === id) {
+                        removePlayer = index;
+                    }
+                });
+                if (removePlayer != null) {
+                    resp.players.slice(removePlayer, 1);
+                }
+                return gamesDB.put(resp).then(refreshAll);;
+            });
+        },
+        removeGame = function removeGame(id) {
+            var removeGame;
+            id = Number(id);
+            gamesDB.get('games').then(function (resp) {
+                resp.games.forEach(function (value, index) {
+                    if (value.id === id) {
+                        removeGame = index;
+                    }
+                });
+                if (removeGame != null) {
+                    resp.games.slice(removeGame, 1);
+                }
+                return gamesDB.put(resp).then(refreshAll);
             });
         },
         /**
@@ -144,6 +215,40 @@
                 players: playerArr
             });
         },
+        saveEditUser = function saveEditUser(e) {
+            e.preventDefault();
+            var el = this,
+                firstName = el.querySelector('input[name="editFirstName"]').value,
+                lastName = el.querySelector('input[name="editLastName"]').value,
+                playerIndex;
+            return gamesDB.get('games').then(function (resp) {
+                resp.players.forEach(function (value, index) {
+                    if (value.id === Number(el.userID.value)) {
+                        playerIndex = index;
+                    }
+                });
+                if (playerIndex == null) {
+                    return false;
+                }
+                resp.players[playerIndex].firstName = firstName;
+                resp.players[playerIndex].lastName = lastName;
+                return gamesDB.put(resp).then(refreshAll);
+            });
+
+        },
+        showPlayerModal = function showPlayerModal(e) {
+            e.preventDefault();
+            var el = $(this).closest('form').get(0),
+                userID = el.getAttribute('data-id'),
+                firstName = el.userFirstName.value,
+                lastName = el.userLastName.value;
+            $("#playerModal").modal('show');
+            $("#editFirstName").val(firstName);
+            $("#editLastName").val(lastName);
+            $("#userID").val(userID);
+
+
+        },
         /**
          * @param obj
          * @returns {*}
@@ -151,16 +256,28 @@
         addUserTemplateToDom = function addUserTemplateToDom(obj) {
             var template = document.getElementById('usercards-template'),
                 appendTo = document.getElementById('playerList'),
+                playerOneSelect = document.querySelector("select[name='playerOneSelect']"),
+                playerTwoSelect =  document.querySelector("select[name='playerTwoSelect']"),
                 clone;
             obj = obj || playersObj;
             obj.forEach(function createElement(value) {
+
+                var createOption = document.createElement('OPTION');
+                createOption.setAttribute('data-id', value.id);
+                createOption.value = value.id;
+                createOption.innerHTML = value.firstName + ' ' + value.lastName;
+                var cloneOption = createOption.cloneNode(true);
                 clone = document.importNode(template.content, true);
+                clone.querySelector('#userFirstName').value = value.firstName;
+                clone.querySelector("#userLastName").value = value.lastName;
                 clone.querySelector('.card').setAttribute('data-id', value.id);
                 clone.querySelector('.fullName').innerHTML = value.firstName + ' ' + value.lastName;
                 clone.querySelector('.totalGames').innerHTML = value.totalGames;
                 clone.querySelector('.gamesWon').innerHTML = value.gamesWon;
                 clone.querySelector('.gamesLost').innerHTML = value.gamesLost;
                 appendTo.appendChild(clone);
+                playerOneSelect.appendChild(createOption);
+                playerTwoSelect.appendChild(cloneOption);
             });
 
         },
@@ -258,8 +375,13 @@
     window.gamesDB = gamesDB;
     window.getRandomInt = getRandomInt;
     window.getGamesWonAndLost = getGamesWonAndLost;
+
     $("#toggleUsers").off('click').on('click', toggleUserVisibility);
     $("#toggleGames").off('click').on('click', toggleGameVisibility);
     $("#showAddPlayer").off('click').on('click', toggleNewPlayer);
     $("#showAddGame").off('click').on('click', toggleNewGame);
+    $("#editPlayerForm").off('submit').on('submit', saveEditUser);
+    $(document)
+        .off('click.editUser')
+        .on('click.editUser', '.editUser', showPlayerModal);
 }());
