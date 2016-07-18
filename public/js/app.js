@@ -3,10 +3,13 @@
     var gamesDB = new PouchDB('games'),
         totalGames = 0,
         totalPlayers = 0,
-        games = gamesDB.allDocs({include_docs: true}),
         gamesObj,
         playersObj,
         rev,
+        ignoreFunc = function ignoreFunc(ignore) {
+            console.log(ignore);
+            return Promise.resolve();
+        },
         /**
          * Get a random floating point number between `min` and `max`.
          *
@@ -53,23 +56,29 @@
 
         /**
          *
+         * @throws Error
          * @returns {*}
          */
         getPlayersAndGames = function getPlayersAndGames() {
+
             return gamesDB.get('games').then(function (resp) {
-                playersObj = resp.players;
-                gamesObj = resp.games;
-                rev = resp._rev;
-                if (gamesObj) {
-                    totalGames = gamesObj.length;
-                    $("#totalGames").html(totalGames);
-                }
-                if (playersObj) {
-                    totalPlayers = playersObj.length;
-                    $("#totalPlayers").html(totalPlayers);
-                }
-                return resp;
-            });
+                    playersObj = resp.players;
+                    gamesObj = resp.games;
+                    rev = resp._rev;
+                    if (gamesObj) {
+                        totalGames = gamesObj.length;
+                        $("#totalGames").html(totalGames);
+                    }
+                    if (playersObj) {
+                        totalPlayers = playersObj.length;
+                        $("#totalPlayers").html(totalPlayers);
+                    }
+                    return resp;
+                }).catch(function () {
+                    addFakeGames();
+                    return getPlayersAndGames();
+                });
+
         },
         /**
          * This is an inefficient solution, but for demo purposes,
@@ -77,10 +86,15 @@
          * will empty the DOM and repopulate it with the new values.
          */
         refreshAll = function refreshAll() {
-            getPlayersAndGames().then(function (resp) {
-                $("#playerList").empty();
-                $("#gameList").empty();
-            }).then(addUserTemplateToDom).then(addGamesTemplateToDom);
+            getPlayersAndGames()
+                .then(function () {
+                    $("#playerList").empty();
+                    $("#gameList").empty();
+                    return Promise.resolve();
+                })
+                .then(addUserTemplateToDom)
+                .then(addGamesTemplateToDom)
+                .catch(ignoreFunc);
         },
         /**
          * Mildly naive approach, you could use a filter and return each element
@@ -105,8 +119,8 @@
                 resp.players.push(player);
 
                 return gamesDB.put(resp)
-                    .then(refreshAll);
-            });
+                    .then(refreshAll).catch(ignoreFunc);
+            }).catch(ignoreFunc);
         },
         /**
          * Pass in the data-id and remove the player by that value
@@ -125,8 +139,10 @@
                 if (removePlayer != null) {
                     resp.players.slice(removePlayer, 1);
                 }
-                return gamesDB.put(resp).then(refreshAll);;
-            });
+                return gamesDB.put(resp)
+                    .then(refreshAll)
+                    .catch(ignoreFunc);
+            }).catch(ignoreFunc);
         },
         removeGame = function removeGame(id) {
             var removeGame;
@@ -140,8 +156,10 @@
                 if (removeGame != null) {
                     resp.games.slice(removeGame, 1);
                 }
-                return gamesDB.put(resp).then(refreshAll);
-            });
+                return gamesDB.put(resp)
+                    .then(refreshAll)
+                    .catch(ignoreFunc);
+            }).catch(ignoreFunc);
         },
         /**
          * Destroy the databases
@@ -150,7 +168,7 @@
         destroyDB = function destroyDBs() {
             return gamesDB.destroy().then(function (res) {
                 console.log("DB Destroyed");
-            });
+            }).catch(ignoreFunc);
         },
         /**
          *
@@ -208,12 +226,11 @@
                     gameDate: faker.date.recent(100)
                 });
             }
-
             return gamesDB.put({
                 _id: 'games',
                 games: gameArr,
                 players: playerArr
-            });
+            }).then(getPlayersAndGames).catch(ignoreFunc);
         },
         saveEditUser = function saveEditUser(e) {
             e.preventDefault();
@@ -232,8 +249,10 @@
                 }
                 resp.players[playerIndex].firstName = firstName;
                 resp.players[playerIndex].lastName = lastName;
-                return gamesDB.put(resp).then(refreshAll);
-            });
+                return gamesDB.put(resp)
+                    .then(refreshAll)
+                    .catch(ignoreFunc);
+            }).catch(ignoreFunc);
 
         },
         showPlayerModal = function showPlayerModal(e) {
@@ -259,7 +278,13 @@
                 playerOneSelect = document.querySelector("select[name='playerOneSelect']"),
                 playerTwoSelect =  document.querySelector("select[name='playerTwoSelect']"),
                 clone;
-            obj = obj || playersObj;
+            if (obj) {
+                if (obj.players) {
+                    obj = obj.players;
+                }
+            } else {
+                obj = playersObj;
+            }
             obj.forEach(function createElement(value) {
 
                 var createOption = document.createElement('OPTION');
@@ -362,14 +387,13 @@
 
 
 
+    $('body').dimmer('show');
     // begin spinner loading
-    games.then(getPlayersAndGames)
-        .then(addFakeGames)
+    gamesDB.then(getPlayersAndGames)
         .then(addUserTemplateToDom)
         .then(addGamesTemplateToDom)
         .then(function () {
-            // End spinner loading
-            console.log("Finished loading");
+            $('body').dimmer('hide');
         });
     window.destroyDB = destroyDB;
     window.gamesDB = gamesDB;
