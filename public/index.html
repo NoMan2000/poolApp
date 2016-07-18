@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Pool App</title>
+    <!-- inject:css -->
+    <link rel="stylesheet" href="/css/deps.css">
+    <!--endinject-->
+    <link rel="stylesheet" href="/css/app.css">
+
+</head>
+<style>
+    .padding-top-2rem {
+        padding-top: 2rem;
+    }
+</style>
+<body class="basic minimal">
+<main class="ui container padding-top-2rem" id="mainApp">
+    <div class="ui horizontal divider">Players</div>
+        <section class="ui compact menu">
+            <a href="#" class="item" id="toggleUsers">
+                <i class="user icon"></i>Total Players:
+                <div class="floating ui label" id="totalPlayers">0</div>
+                <span id="showPlayerDesc">Click to show players</span>
+            </a>
+        </section>
+
+        <section id="playerList" class="ui cards hide">
+
+        </section>
+
+        <section class="segment padded">
+            <h1>Players</h1>
+            <button class="button ui primary" id="showAddPlayer">
+                <i class="add user icon"></i>
+                Add New Player
+            </button>
+        </section>
+
+    <form action="#" class="ui form hide" id="newPlayerForm" name="newPlayerForm">
+        <div class="fields">
+            <div class="field required">
+                <label for="playerFirstName">First Name:</label>
+                <div class="ui left icon input">
+                    <input type="text" required="required"
+                           name="playerFirstName" id="playerFirstName" />
+                    <i class="user icon"></i>
+                </div>
+            </div>
+            <div class="field required">
+                <label for="playerLastName">Last Name:</label>
+                <input type="text" required="required" id="playerLastName" name="playerLastName">
+            </div>
+            <div class="field">
+                <!--Empty label to keep spacing with other elements-->
+                <label>&nbsp;</label>
+                <button class="ui primary button" id="addPlayerSubmit" type="submit">
+                    Submit
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <div class="ui horizontal divider">Games</div>
+    <section class="ui compact menu">
+        <a href="#" class="item" id="toggleGames">
+            <i class="trophy icon"></i>Total Games:
+            <div class="floating ui label" id="totalGames">0</div>
+            <span id="showGamesDesc">Click to show games</span>
+        </a>
+    </section>
+
+    <section id="gameList" class="ui cards hide"></section>
+
+    <section class="segment padded">
+        <button class="button ui primary" id="showAddGame">
+            <i class="add trophy icon"></i>
+            Add New Game</button>
+    </section>
+
+    <form action="#" class="ui form hide" id="newGameForm" name="newGameForm">
+        <div class="fields">
+            <div class="field required">
+                <label for="gamePlayDate">Game Date:</label>
+                <div class="ui left icon input">
+                    <input type="date" required="required" name="gamePlayDate" id="gamePlayDate" />
+                    <i class="calendar icon"></i>
+                </div>
+            </div>
+
+            <div class="field required">
+                <label>Player One:</label>
+                <select name="playerOneSelect" class="ui selection dropdown">
+
+                </select>
+            </div>
+
+            <div class="field required">
+                <label >Player Two:</label>
+                <select name="playerTwoSelect" class="ui selection dropdown">
+
+                </select>
+            </div>
+            <div class="field">
+                <!--Empty label to keep spacing with other elements-->
+                <label>&nbsp;</label>
+                <button class="ui primary button" id="addGameSubmit" type="submit">
+                    Submit
+                </button>
+            </div>
+
+
+        </div>
+    </form>
+
+</main>
+
+<!-- Player Modal -->
+<div class="ui modal" id="playerModal">
+    <h2 class="header">Full Name</h2>
+    <form class="fields ui form" name="editPlayerForm" id="editPlayerForm">
+        <input type="hidden" id="userID" name="userID" value="">
+        <div class="field required">
+            <label for="editFirstName">First Name:</label>
+            <input type="text" name="editFirstName" id="editFirstName">
+        </div>
+        <div class="field required">
+            <label for="editLastName">Last Name:</label>
+            <input type="text" name="editLastName" id="editLastName">
+        </div>
+        <div class="field">
+            <label>&nbsp;</label>
+            <button type="submit"
+                    id="saveEditUser"
+                    class="ui labeled icon button primary">
+                <i class="icon save"></i>
+                Save Edit User
+            </button>
+        </div>
+
+    </form>
+</div>
+<!-- End Player Modal-->
+
+<!-- User Cards Template -->
+<template id="usercards-template">
+    <form class="card" data-id="" name="userForm">
+        <input type="hidden" id="userFirstName" name="userFirstName">
+        <input type="hidden" id="userLastName" name="userLastName">
+        <div class="content">
+            <div class="header">
+                Full Name: <span class="fullName"></span>
+            </div>
+            <div class="meta">
+                Total Games: <span class="totalGames"></span>
+            </div>
+        </div>
+        <div class="extra content">
+            <div class="ui two buttons">
+                <div class="ui basic green button">Games Won:<br/> <span class="gamesWon">games won</span></div>
+                <div class="ui basic red button">Games Lost:<br/> <span class="gamesLost">games wost</span></div>
+            </div>
+        </div>
+        <div class="extra content center aligned grid">
+            <div class="ui buttons">
+                <button class="ui orange button editUser">
+                    <i class="write icon"></i>
+                    Edit</button>
+                <div class="or"></div>
+                <button class="ui red button deleteUser">
+                    <i class="delete icon"></i>
+                    Delete</button>
+            </div>
+        </div>
+    </form>
+</template>
+<!-- End User Cards Template -->
+<!-- Games Card Template-->
+<template id="gamescard-template">
+    <form class="card" data-id="" name="gameForm">
+        <div class="content">
+            <div class="header">
+                Game Date: <span class="gameDate"></span>
+            </div>
+
+        </div>
+        <div class="extra content">
+            <div class="ui two buttons">
+                <div class="ui basic green button">Winner:<br/> <span class="gameWinner">Game Winner</span></div>
+                <div class="ui basic red button">Loser:<br/> <span class="gameLoser">Game Loser</span></div>
+            </div>
+        </div>
+        <div class="extra content center aligned grid">
+            <div class="ui buttons">
+                <button class="ui orange button">
+                    <i class="write icon"></i>
+                    Edit</button>
+                <div class="or"></div>
+                <button class="ui red button">
+                    <i class="delete icon"></i>
+                    Delete</button>
+            </div>
+        </div>
+    </form>
+</template>
+<!-- End Games Card Template-->
+<!--Todo Combine.  Add in a cache manifest file
+    Todo Setup Gulp File
+-->
+
+<!-- inject:js-->
+<script src="/js/deps.js"></script>
+<!-- endinject -->
+<script src="/js/app.js"></script>
+</body>
+</html>
