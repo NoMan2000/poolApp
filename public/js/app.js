@@ -220,8 +220,8 @@
 
                 gameArr.push({
                     id: i,
-                    playerOne: playerOne,
-                    playerTwo: playerTwo,
+                    playerOne: playerOne.id,
+                    playerTwo: playerTwo.id,
                     winner: gameWinner,
                     gameDate: faker.date.recent(100)
                 });
@@ -265,8 +265,15 @@
             $("#editFirstName").val(firstName);
             $("#editLastName").val(lastName);
             $("#userID").val(userID);
-
-
+        },
+        getPlayerForID = function getPlayerForID(id) {
+            var player;
+            playersObj.forEach(function (value, index) {
+                if (id === Number(value.id)) {
+                    player = value;
+                }
+            });
+            return player;
         },
         /**
          * @param obj
@@ -315,8 +322,8 @@
             obj.forEach(function createElement(value) {
                 var gameDate = moment(value.gameDate).format("dddd, MMMM Do YYYY, h:mm:ss a"),
                     winner = value.winner,
-                    playerOne = value.playerOne,
-                    playerTwo = value.playerTwo,
+                    playerOne = getPlayerForID(value.playerOne),
+                    playerTwo = getPlayerForID(value.playerTwo),
                     winnerName,
                     loserName;
                 if (playerOne.id === winner) {
