@@ -1,21 +1,24 @@
-var express = require('express');
-var app = express();
+(function (){
+    'use strict';
+    var express = require('express');
+    var app = express();
+    var port = process.env.PORT || 5000;
 
-var port = 5000;
+    /**
+     * Use static files
+     */
+    app.use(express.static('./public'));
 
-/**
- * Use static files
- */
-app.use(express.static('./public'));
+    app.get('/', function (req, res) {
+        res.send("hello World");
+    });
 
-app.get('/', function (req, res) {
-    res.send("hello World");
-});
+    app.listen(port, function (err) {
+        if (err) {
+            throw err;
+        }
+        console.log('Running server on ' + port);
+    });
+}());
 
-app.listen(port, function (err) {
-    if (err) {
-        throw err;
-    }
-    console.log('Running server on ' + port);
-});
 

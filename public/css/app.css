@@ -1,0 +1,7 @@
+#playerList, form, .segment {
+    margin-top:1rem;
+    margin-bottom:1rem;
+}
+.hide {
+    display:none !important;
+}

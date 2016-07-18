@@ -26,6 +26,38 @@
     "jquery": "^3.1.0",
     "bower": "*",
     "install": "^1.0.4",
-    "semantic": "semantic-ui#^2.2.2"
+    "semantic": "semantic-ui#^2.2.2",
+    "faker": "Faker#^3.1.0",
+    "vue-resource": "^0.9.3",
+    "moment": "^2.14.1"
+  },
+  "overrides": {
+    "semantic": {
+      "main": [
+        "src/semantic.less",
+        "dist/semantic.js",
+        "dist/semantic.css"
+      ]
+    },
+    "pouchdb": {
+      "main": [
+        "dist/pouchdb.js"
+      ]
+    },
+    "jquery": {
+      "main": [
+        "dist/jquery.js"
+      ]
+    },
+    "faker": {
+      "main": [
+        "build/build/faker.js"
+      ]
+    },
+    "vue": {
+      "main": [
+        "dist/vue.js"
+      ]
+    }
   }
 }
