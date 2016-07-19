@@ -17,33 +17,111 @@
 <body class="basic minimal">
 <main class="ui container padding-top-2rem" id="mainApp">
     <div class="ui horizontal divider">Players</div>
-        <section class="ui compact menu">
-            <a href="#" class="item" id="toggleUsers">
-                <i class="user icon"></i>Total Players:
-                <div class="floating ui label" id="totalPlayers">0</div>
-                <span id="showPlayerDesc">Click to show players</span>
-            </a>
-        </section>
+    <section class="ui compact menu">
+        <a href="#" class="item" id="toggleUsers">
+            <i class="user icon"></i>Total Players:
+            <div class="floating ui label" id="totalPlayers">0</div>
+            <span id="showPlayerDesc">Click to show players</span>
+        </a>
+    </section>
 
-        <section id="playerList" class="ui cards hide">
+    <section id="playerList" class="ui cards hide">
 
-        </section>
+    </section>
 
-        <section class="segment padded">
-            <h1>Players</h1>
-            <button class="button ui primary" id="showAddPlayer">
-                <i class="add user icon"></i>
-                Add New Player
-            </button>
-        </section>
+    <section class="segment padded">
+        <h1>Players</h1>
+        <button class="button ui primary" id="showAddPlayer">
+            <i class="add user icon"></i>
+            Add New Player
+        </button>
+    </section>
 
-    <form action="#" class="ui form hide" id="newPlayerForm" name="newPlayerForm">
-        <div class="fields">
+
+
+    <div class="ui horizontal divider">Games</div>
+    <section class="ui compact menu">
+        <a href="#" class="item" id="toggleGames">
+            <i class="trophy icon"></i>Total Games:
+            <div class="floating ui label" id="totalGames">0</div>
+            <span id="showGamesDesc">Click to show games</span>
+        </a>
+    </section>
+
+    <section id="gameList" class="ui cards hide"></section>
+
+    <section class="segment padded">
+        <button class="button ui primary" id="showAddGame">
+            <i class="add trophy icon"></i>
+            Add New Game
+        </button>
+    </section>
+
+
+</main>
+
+<!-- Add New Game Modal -->
+<div class="ui modal" id="newGameModal">
+    <i class="close icon"></i>
+    <div class="header">
+        New Game
+    </div>
+    <form action="#" class="ui form content" id="newGameForm" name="newGameForm">
+        <div class="three fields">
+            <div class="field required">
+                <label for="gamePlayDate">Game Date:</label>
+                <div class="ui left icon input">
+                    <input type="date" required="required" name="gamePlayDate" id="gamePlayDate"/>
+                    <i class="calendar icon"></i>
+                </div>
+            </div>
+
+            <div class="field required">
+                <label>Player One:</label>
+                <select name="playerOneSelect" class="ui selection dropdown">
+
+                </select>
+            </div>
+
+
+            <div class="field required">
+                <label>Player Two:</label>
+                <select name="playerTwoSelect" class="ui selection dropdown">
+
+                </select>
+            </div>
+        </div>
+        <div class="two fields">
+            <div class="field required">
+                <label>Winner:</label>
+                <select name="winner" class="ui selection dropdown">
+
+                </select>
+            </div>
+
+            <div class="field">
+                <!--Empty label to keep spacing with other elements-->
+                <label>&nbsp;</label>
+                <button class="ui primary button" name="addGameSubmit" id="addGameSubmit" type="submit">
+                    Save New Game
+                </button>
+            </div>
+        </div>
+</form>
+
+</div>
+<!-- End Add New Game Modal -->
+
+<!-- Add New User Modal -->
+<div class="ui modal" id="addNewPlayerModal">
+    <form action="#" class="ui form content" id="newPlayerForm" name="newPlayerForm">
+        <h2 class="header">New Player</h2>
+        <div class="three fields">
             <div class="field required">
                 <label for="playerFirstName">First Name:</label>
                 <div class="ui left icon input">
                     <input type="text" required="required"
-                           name="playerFirstName" id="playerFirstName" />
+                           name="playerFirstName" id="playerFirstName"/>
                     <i class="user icon"></i>
                 </div>
             </div>
@@ -60,62 +138,8 @@
             </div>
         </div>
     </form>
-
-    <div class="ui horizontal divider">Games</div>
-    <section class="ui compact menu">
-        <a href="#" class="item" id="toggleGames">
-            <i class="trophy icon"></i>Total Games:
-            <div class="floating ui label" id="totalGames">0</div>
-            <span id="showGamesDesc">Click to show games</span>
-        </a>
-    </section>
-
-    <section id="gameList" class="ui cards hide"></section>
-
-    <section class="segment padded">
-        <button class="button ui primary" id="showAddGame">
-            <i class="add trophy icon"></i>
-            Add New Game</button>
-    </section>
-
-    <form action="#" class="ui form hide" id="newGameForm" name="newGameForm">
-        <div class="fields">
-            <div class="field required">
-                <label for="gamePlayDate">Game Date:</label>
-                <div class="ui left icon input">
-                    <input type="date" required="required" name="gamePlayDate" id="gamePlayDate" />
-                    <i class="calendar icon"></i>
-                </div>
-            </div>
-
-            <div class="field required">
-                <label>Player One:</label>
-                <select name="playerOneSelect" class="ui selection dropdown">
-
-                </select>
-            </div>
-
-            <div class="field required">
-                <label >Player Two:</label>
-                <select name="playerTwoSelect" class="ui selection dropdown">
-
-                </select>
-            </div>
-            <div class="field">
-                <!--Empty label to keep spacing with other elements-->
-                <label>&nbsp;</label>
-                <button class="ui primary button" id="addGameSubmit" type="submit">
-                    Submit
-                </button>
-            </div>
-
-
-        </div>
-    </form>
-
-</main>
-
-<!-- Player Modal -->
+</div>
+<!-- Edit User Modal -->
 <div class="ui modal" id="playerModal">
     <h2 class="header">Full Name</h2>
     <form class="fields ui form" name="editPlayerForm" id="editPlayerForm">
@@ -140,7 +164,7 @@
 
     </form>
 </div>
-<!-- End Player Modal-->
+<!-- End Edit User Modal-->
 
 <!-- User Cards Template -->
 <template id="usercards-template">
@@ -165,16 +189,19 @@
             <div class="ui buttons">
                 <button class="ui orange button editUser">
                     <i class="write icon"></i>
-                    Edit</button>
+                    Edit
+                </button>
                 <div class="or"></div>
                 <button class="ui red button deleteUser">
                     <i class="delete icon"></i>
-                    Delete</button>
+                    Delete
+                </button>
             </div>
         </div>
     </form>
 </template>
 <!-- End User Cards Template -->
+
 <!-- Games Card Template-->
 <template id="gamescard-template">
     <form class="card" data-id="" name="gameForm">
@@ -186,27 +213,21 @@
         </div>
         <div class="extra content">
             <div class="ui two buttons">
-                <div class="ui basic green button">Winner:<br/> <span class="gameWinner">Game Winner</span></div>
-                <div class="ui basic red button">Loser:<br/> <span class="gameLoser">Game Loser</span></div>
+                <div class="ui basic green button">Winner:<br/> <span class="gameWinner" data-id="">Game Winner</span></div>
+                <div class="ui basic red button">Loser:<br/> <span class="gameLoser" data-id="">Game Loser</span></div>
             </div>
         </div>
         <div class="extra content center aligned grid">
             <div class="ui buttons">
-                <button class="ui orange button">
-                    <i class="write icon"></i>
-                    Edit</button>
-                <div class="or"></div>
-                <button class="ui red button">
+                <button class="ui red button deleteGame">
                     <i class="delete icon"></i>
-                    Delete</button>
+                    Delete
+                </button>
             </div>
         </div>
     </form>
 </template>
 <!-- End Games Card Template-->
-<!--Todo Combine.  Add in a cache manifest file
-    Todo Setup Gulp File
--->
 
 <!-- inject:js-->
 <script src="/js/deps.js"></script>

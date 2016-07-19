@@ -1,5 +1,10 @@
 (function indexJS() {
     'use strict';
+    // Todo:  Add a global setError, setSuccess, hideError, hideSuccess.
+    /**
+     *
+     * @type {PouchDB}
+     */
     var gamesDB = new PouchDB('games'),
         totalGames = 0,
         totalPlayers = 0,
@@ -60,25 +65,23 @@
          * @returns {*}
          */
         getPlayersAndGames = function getPlayersAndGames() {
-
             return gamesDB.get('games').then(function (resp) {
-                    playersObj = resp.players;
-                    gamesObj = resp.games;
-                    rev = resp._rev;
-                    if (gamesObj) {
-                        totalGames = gamesObj.length;
-                        $("#totalGames").html(totalGames);
-                    }
-                    if (playersObj) {
-                        totalPlayers = playersObj.length;
-                        $("#totalPlayers").html(totalPlayers);
-                    }
-                    return resp;
-                }).catch(function () {
-                    addFakeGames();
-                    return getPlayersAndGames();
-                });
-
+                playersObj = resp.players;
+                gamesObj = resp.games;
+                rev = resp._rev;
+                if (gamesObj) {
+                    totalGames = gamesObj.length;
+                    $("#totalGames").html(totalGames);
+                }
+                if (playersObj) {
+                    totalPlayers = playersObj.length;
+                    $("#totalPlayers").html(totalPlayers);
+                }
+                return resp;
+            }).catch(function () {
+                addFakeGames();
+                return getPlayersAndGames();
+            });
         },
         /**
          * This is an inefficient solution, but for demo purposes,
@@ -103,8 +106,9 @@
          */
         addPlayer = function addPlayer(e) {
             e.preventDefault();
-            var firstName = e.firstName,
-                lastName = e.lastName;
+            var el = this,
+                firstName = el.playerFirstName.value,
+                lastName = el.playerLastName.value;
             gamesDB.get('games').then(function (resp) {
                 var len = resp.players.length - 1,
                     id = resp.players[len].id + 1,
@@ -119,34 +123,44 @@
                 resp.players.push(player);
 
                 return gamesDB.put(resp)
-                    .then(refreshAll).catch(ignoreFunc);
+                    .then(refreshAll)
+                    .then(function () {
+                        $("#addNewPlayerModal").modal('hide');
+                    })
+                    .catch(ignoreFunc);
             }).catch(ignoreFunc);
         },
         /**
-         * Pass in the data-id and remove the player by that value
-         * @param id
+         * @param e
          */
         removePlayer = function removePlayer(e) {
             e.preventDefault();
-            var removePlayer;
-            // var id = Number(id);
+            var removePlayer,
+                id = Number($(this).closest('form').attr('data-id'));
             gamesDB.get('games').then(function (resp) {
                 resp.players.forEach(function (value, index) {
-                    if (value.id === id) {
+                    if (Number(value.id) === id) {
                         removePlayer = index;
                     }
                 });
                 if (removePlayer != null) {
-                    resp.players.slice(removePlayer, 1);
+                    resp.players.splice(removePlayer, 1);
                 }
                 return gamesDB.put(resp)
                     .then(refreshAll)
                     .catch(ignoreFunc);
             }).catch(ignoreFunc);
         },
-        removeGame = function removeGame(id) {
-            var removeGame;
+        removeGame = function removeGame(e) {
+            e.preventDefault();
+            var $el = $(this).closest('form'),
+                id = $el.attr('data-id'),
+                winner = $el.find('.gameWinner').attr("data-id"),
+                loser = $el.find('.gameLoser').attr("data-id"),
+                removeGame;
             id = Number(id);
+            winner = Number(winner);
+            loser = Number(loser);
             gamesDB.get('games').then(function (resp) {
                 resp.games.forEach(function (value, index) {
                     if (value.id === id) {
@@ -154,8 +168,13 @@
                     }
                 });
                 if (removeGame != null) {
-                    resp.games.slice(removeGame, 1);
+                    resp.games.splice(removeGame, 1);
                 }
+                resp.players[winner].totalGames -= 1;
+                resp.players[winner].gamesWon -= 1;
+                resp.players[loser].totalGames -= 1;
+                resp.players[loser].gamesLost -= 1;
+
                 return gamesDB.put(resp)
                     .then(refreshAll)
                     .catch(ignoreFunc);
@@ -232,6 +251,48 @@
                 players: playerArr
             }).then(getPlayersAndGames).catch(ignoreFunc);
         },
+        saveAddGame = function saveAddGame(e) {
+            e.preventDefault();
+            var el = this,
+                playerOne = Number(el.playerOneSelect.value),
+                playerTwo = Number(el.playerTwoSelect.value),
+                winner = Number(el.winner.value),
+                loser = winner === playerOne ? playerTwo : playerOne,
+                gameDate = moment().toDate(this.gamePlayDate.value);
+            if (playerOne === playerTwo) {
+                alert("While it might help your ego, you cannot play a game against yourself and call yourself the winner");
+                return false;
+            }
+            gamesDB.get('games').then(function (resp) {
+                var len = resp.games.length - 1,
+                    id = resp.games[len].id + 1,
+                    game = {
+                        id: id,
+                        playerOne: playerOne,
+                        playerTwo: playerTwo,
+                        winner: winner,
+                        gameDate: gameDate
+                    };
+                resp.players[playerOne].totalGames += 1;
+                resp.players[playerTwo].totalGames += 1;
+                resp.players[winner].gamesWon += 1;
+                resp.players[loser].gamesLost += 1;
+
+                resp.games.push(game);
+
+                return gamesDB.put(resp)
+                    .then(refreshAll)
+                    .then(function () {
+                        $("#newGameModal").modal('hide');
+                    })
+                    .catch(ignoreFunc);
+            }).catch(ignoreFunc);
+
+        },
+        saveEditGame = function (e) {
+            e.preventDefualt();
+
+        },
         saveEditUser = function saveEditUser(e) {
             e.preventDefault();
             var el = this,
@@ -251,9 +312,11 @@
                 resp.players[playerIndex].lastName = lastName;
                 return gamesDB.put(resp)
                     .then(refreshAll)
+                    .then(function () {
+                        $("#playerModal").modal('hide');
+                    })
                     .catch(ignoreFunc);
             }).catch(ignoreFunc);
-
         },
         showPlayerModal = function showPlayerModal(e) {
             e.preventDefault();
@@ -266,9 +329,22 @@
             $("#editLastName").val(lastName);
             $("#userID").val(userID);
         },
+        /**
+         * The default player is setup so that when a user gets deleted
+         * and the game tries to look it up, it does not return an error.
+         * @param id
+         * @returns {{firstName: string, gamesLost: number, gamesWon: number, id: null, lastName: null, totalGames: number}}
+         */
         getPlayerForID = function getPlayerForID(id) {
-            var player;
-            playersObj.forEach(function (value, index) {
+            var player = {
+                firstName: "Unknown or Deleted",
+                gamesLost: 0,
+                gamesWon: 0,
+                id: 0,
+                lastName: '',
+                totalGames: 0
+            };
+            playersObj.forEach(function (value) {
                 if (id === Number(value.id)) {
                     player = value;
                 }
@@ -324,8 +400,10 @@
                     winner = value.winner,
                     playerOne = getPlayerForID(value.playerOne),
                     playerTwo = getPlayerForID(value.playerTwo),
+                    loser = playerOne.id === winner ? playerTwo.id : playerOne.id,
                     winnerName,
                     loserName;
+
                 if (playerOne.id === winner) {
                     winnerName = playerOne.firstName + ' ' + playerOne.lastName;
                     loserName = playerTwo.firstName + ' ' + playerTwo.lastName;
@@ -339,7 +417,9 @@
                 clone.querySelector('.gameDate').innerHTML = gameDate;
 
                 clone.querySelector('.gameWinner').innerHTML = winnerName;
+                clone.querySelector('.gameWinner').setAttribute('data-id', winner);
                 clone.querySelector('.gameLoser').innerHTML = loserName;
+                clone.querySelector('.gameLoser').setAttribute('data-id', loser);
                 appendTo.appendChild(clone);
             });
             return obj;
@@ -386,10 +466,35 @@
             }
         },
         toggleNewPlayer = function toggleNewPlayer(e) {
-            $("#newPlayerForm").toggleClass('hide');
+            $("#addNewPlayerModal").modal('show');
         },
         toggleNewGame = function toggleNewGame(e) {
-            $("#newGameForm").toggleClass('hide');
+            changeWinner();
+            $("#gamePlayDate").val(moment().format('YYYY-MM-DD'));
+            $("#newGameModal").modal('show');
+        },
+        toggleEditGame = function toggleEditGame(e) {
+            $("#editGameModal").modal('show');
+            debugger;
+            var $el = $(this).closest('.content');
+            changeEditWinner($el);
+        },
+        changeWinner = function changeWinner() {
+            var $playerOne = $("select[name='playerOneSelect']"),
+                $playerTwo = $("select[name='playerTwoSelect']"),
+                playerOneVal = $playerOne.val(),
+                playerTwoVal = $playerTwo.val(),
+                $winner = $("select[name='winner']"),
+                optionOne,
+                optionTwo;
+            $winner.empty();
+            optionOne = document.createElement('OPTION');
+            optionTwo = document.createElement('OPTION');
+            optionOne.value = playerOneVal;
+            optionTwo.value = playerTwoVal;
+            optionOne.innerHTML = $playerOne.find('option:selected').html();
+            optionTwo.innerHTML = $playerTwo.find('option:selected').html();
+            $winner.append(optionOne).append(optionTwo);
         };
 
 
@@ -401,18 +506,36 @@
         .then(addGamesTemplateToDom)
         .then(function () {
             $('body').dimmer('hide');
+        }).catch(function (ignore) {
+            console.log(ignore);
+            $('body').dimmer('hide');
         });
     window.destroyDB = destroyDB;
     window.gamesDB = gamesDB;
     window.getRandomInt = getRandomInt;
     window.getGamesWonAndLost = getGamesWonAndLost;
 
+    /**
+     * Todo:
+     *
+     */
+
     $("#toggleUsers").off('click').on('click', toggleUserVisibility);
     $("#toggleGames").off('click').on('click', toggleGameVisibility);
     $("#showAddPlayer").off('click').on('click', toggleNewPlayer);
     $("#showAddGame").off('click').on('click', toggleNewGame);
     $("#editPlayerForm").off('submit').on('submit', saveEditUser);
+    $("#newGameForm").off('submit').on('submit', saveAddGame);
+    $("#newPlayerForm").off('submit').on('submit', addPlayer);
     $(document)
         .off('click.editUser')
-        .on('click.editUser', '.editUser', showPlayerModal);
+        .off('click.removeUser')
+        .off('change.changePlayerOne')
+        .off('change.changePlayerTwo')
+        .off('click.deleteGame')
+        .on('click.editUser', '.editUser', showPlayerModal)
+        .on('click.deleteGame', '.deleteGame', removeGame)
+        .on('change.changePlayer change.changePlayerTwo',
+            '[name="playerOneSelect"], [name="playerTwoSelect"]', changeWinner)
+        .on('click.removeUser', '.deleteUser', removePlayer);
 }());
