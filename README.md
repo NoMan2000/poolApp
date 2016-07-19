@@ -4,7 +4,7 @@
 
 Create a web app that tracks pool games and users.
 
-Requirements:
+**Requirements:**
 
 - Use a framework that is mobile-responsive.  Semantic UI is chosen for its clean interface and class names.
  
@@ -17,3 +17,15 @@ http:// extension, even if it's just for localhost.
 - Faker is used to create fake data to add to the database and DOM for demonstration purposes.
  
 - Demonstrate modern practices with Gulp, Bower, and other tools to automate and update without having to do manual changes.
+
+#To Start
+
+If you're using npm, `npm start` will fire up the app.  If you've installed Gulp and the dependencies, `gulp serve` will start up the app and use nodemon to monitor it in the background.  
+
+If you use this approach, make sure you run `bower install` as well, because it will attempt to inject the latest dependencies from bower into the index.html file.
+
+If you're not using node, any server will work to test out the app, just make sure that it's serving from the `public/` directory, or it will not work.
+
+#Todos:
+
+Like any demo app, there's a lot that can be done with validation, speeding up the DOM, etc.  This is a HTML5 "Modern" app, so if older browser support is needed, then several polyfills and extra compilation steps would be needed to make sure it is compatible.  
