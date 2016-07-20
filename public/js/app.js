@@ -148,7 +148,10 @@
                 }
                 return gamesDB.put(resp)
                     .then(refreshAll)
-                    .catch(ignoreFunc);
+                    .catch(function catchAndReload(err) {
+                        refreshAll();
+                        ignoreFunc(err);
+                    });
             }).catch(ignoreFunc);
         },
         removeGame = function removeGame(e) {
@@ -170,14 +173,21 @@
                 if (removeGame != null) {
                     resp.games.splice(removeGame, 1);
                 }
-                resp.players[winner].totalGames -= 1;
-                resp.players[winner].gamesWon -= 1;
-                resp.players[loser].totalGames -= 1;
-                resp.players[loser].gamesLost -= 1;
-
+                // Update to prevent error condition where user is deleted.
+                if (resp.players[winner]) {
+                    resp.players[winner].totalGames -= 1;
+                    resp.players[winner].gamesWon -= 1;
+                }
+                if (resp.players[loser]) {
+                    resp.players[loser].totalGames -= 1;
+                    resp.players[loser].gamesLost -= 1;
+                }
                 return gamesDB.put(resp)
                     .then(refreshAll)
-                    .catch(ignoreFunc);
+                    .catch(function catchAndReload(err) {
+                        refreshAll();
+                        ignoreFunc(err);
+                    });
             }).catch(ignoreFunc);
         },
         /**
