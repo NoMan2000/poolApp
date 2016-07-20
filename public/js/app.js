@@ -350,7 +350,7 @@
                 firstName: "Unknown or Deleted",
                 gamesLost: 0,
                 gamesWon: 0,
-                id: 0,
+                id: 'NaN',
                 lastName: '',
                 totalGames: 0
             };
