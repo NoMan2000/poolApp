@@ -361,6 +361,38 @@
             });
             return player;
         },
+        sortPeople = {
+            sortByFirstNameAsc: function sortByFirstNameAsc(a, b) {
+                return a.firstName > b.firstName;
+            },
+            sortByFirstNameDesc: function sortByFirstNameDesc(a, b) {
+                return a.firstName < b.firstName;
+            },
+            sortByLastNameAsc: function sortByLastNameAsc(a, b) {
+                return a.lastName > b.lastName;
+            },
+            sortByLastNameDesc: function sortByLastNameDesc(a, b) {
+                return a.lastName < b.lastName;
+            },
+            sortByTotalGamesAsc: function sortByTotalGamesAsc(a, b) {
+                return a.totalGames > b.totalGames;
+            },
+            sortByTotalGamesDesc: function sortByTotalGamesDesc(a, b) {
+                return a.totalGames < b.totalGames;
+            },
+            sortByGamesLostAsc: function sortByGamesLostAsc(a, b) {
+                return a.gamesLost > b.gamesLost;
+            },
+            sortByGamesLostDesc: function sortByGamesLostDesc(a, b) {
+                return a.gamesLost < b.gamesLost;
+            },
+            sortByGamesWonAsc: function sortByGamesWonAsc(a, b) {
+                return a.gamesWon > b.gamesWon;
+            },
+            sortByGamesWonDesc: function sortByGamesWonDesc(a, b) {
+                return a.gamesWon < b.gamesWon;
+            }
+        },
         /**
          * @param obj
          * @returns {*}
@@ -524,6 +556,7 @@
     window.gamesDB = gamesDB;
     window.getRandomInt = getRandomInt;
     window.getGamesWonAndLost = getGamesWonAndLost;
+    window.sortPeople = sortPeople;
 
     /**
      * Todo:
