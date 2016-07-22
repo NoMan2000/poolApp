@@ -83,6 +83,14 @@
                 return getPlayersAndGames();
             });
         },
+        emptyPlayerList = function emptyPlayerList() {
+            $("#playerList").empty();
+            return Promise.resolve();
+        },
+        emptyGamesList = function emptyGamesList() {
+            $("#gameList").empty();
+            return Promise.resolve();
+        },
         /**
          * This is an inefficient solution, but for demo purposes,
          * whenever a CRUD operation is performed on the database, this
@@ -90,11 +98,8 @@
          */
         refreshAll = function refreshAll() {
             getPlayersAndGames()
-                .then(function () {
-                    $("#playerList").empty();
-                    $("#gameList").empty();
-                    return Promise.resolve();
-                })
+                .then(emptyPlayerList)
+                .then(emptyGamesList)
                 .then(addUserTemplateToDom)
                 .then(addGamesTemplateToDom)
                 .catch(ignoreFunc);
@@ -537,6 +542,86 @@
             optionOne.innerHTML = $playerOne.find('option:selected').html();
             optionTwo.innerHTML = $playerTwo.find('option:selected').html();
             $winner.append(optionOne).append(optionTwo);
+        },
+        playerSort = function playerSort(e) {
+            var $el = $(this),
+                order = $el.attr('data-sort'),
+                type = $el.attr('data-type');
+
+            emptyPlayerList();
+            return getPlayersAndGames()
+                .then(function sortPlayers(resp) {
+                    $('.playerSort').find('i').remove();
+                    if (order === 'asc') {
+                        $el.attr('data-sort', 'desc');
+                        if (type === 'firstName' || type === 'lastName') {
+                            $el.prepend('<i class="sort alphabet ascending icon"></i>');
+                        } else {
+                            $el.prepend('<i class="sort numeric ascending icon"></i>');
+                        }
+
+                        if (type === 'firstName') {
+                            return addUserTemplateToDom(
+                                resp.players.sort(sortPeople.sortByFirstNameAsc)
+                            );
+                        }
+                        if (type === 'lastName') {
+                            return addUserTemplateToDom(
+                                resp.players.sort(sortPeople.sortByLastNameAsc)
+                            );
+                        }
+                        if (type === 'totalGames') {
+                            return addUserTemplateToDom(
+                                resp.players.sort(sortPeople.sortByTotalGamesAsc)
+                            );
+                        }
+                        if (type === 'gamesLost') {
+                            return addUserTemplateToDom(
+                                resp.players.sort(sortPeople.sortByGamesLostAsc)
+                            );
+                        }
+                        if (type === 'gamesWon') {
+                            return addUserTemplateToDom(
+                                resp.players.sort(sortPeople.sortByGamesWonAsc)
+                            );
+                        }
+                    }
+                    if (order === 'desc') {
+                        $el.attr('data-sort', 'asc');
+                        if (type === 'firstName' || type === 'lastName') {
+                            $el.prepend('<i class="sort alphabet descending icon"></i>');
+                        } else {
+                            $el.prepend('<i class="sort numeric descending icon"></i>');
+                        }
+
+                        if (type === 'firstName') {
+                            return addUserTemplateToDom(
+                                resp.players.sort(sortPeople.sortByFirstNameDesc)
+                            );
+                        }
+                        if (type === 'lastName') {
+                            return addUserTemplateToDom(
+                                resp.players.sort(sortPeople.sortByLastNameDesc)
+                            );
+                        }
+                        if (type === 'totalGames') {
+                            return addUserTemplateToDom(
+                                resp.players.sort(sortPeople.sortByTotalGamesDesc)
+                            );
+                        }
+                        if (type === 'gamesLost') {
+                            return addUserTemplateToDom(
+                                resp.players.sort(sortPeople.sortByGamesLostDesc)
+                            );
+                        }
+                        if (type === 'gamesWon') {
+                            return addUserTemplateToDom(
+                                resp.players.sort(sortPeople.sortByGamesWonDesc)
+                            );
+                        }
+                    }
+
+                });
         };
 
 
@@ -570,6 +655,7 @@
     $("#editPlayerForm").off('submit').on('submit', saveEditUser);
     $("#newGameForm").off('submit').on('submit', saveAddGame);
     $("#newPlayerForm").off('submit').on('submit', addPlayer);
+    $(".playerSort").off('click.sort').on('click.sort', playerSort);
     $(document)
         .off('click.editUser')
         .off('click.removeUser')

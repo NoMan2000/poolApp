@@ -13,6 +13,12 @@
     .padding-top-2rem {
         padding-top: 2rem;
     }
+    @media (max-width: 328px) {
+        .button {
+            margin-top:.5rem;
+            margin-bottom:.5rem;
+        }
+    }
 </style>
 <body class="basic minimal">
 <main class="ui container padding-top-2rem" id="mainApp">
@@ -28,32 +34,32 @@
     <section class="ui top attached segment center aligned">
         <div class="ui top attached label">Sort Players By:</div>
         <div class="stackable two column grid">
-            <div class="ui buttons">
-                <button class="ui green button labeled icon">
-                    <i class="sort alphabet ascending icon"></i>
-                    First Name
-                </button>
-                <button class="ui green button labeled icon">
 
-                    Last Name
-                </button>
-            </div>
-            <p></p>
-            <div class="ui buttons">
-                <button class="ui green button labeled icon">
+            <button class="ui green button labeled icon playerSort" data-sort="asc" data-type="firstName">
 
-                    Total Games
-                </button>
-                <button class="ui green button labeled icon">
+                First Name
+            </button>
+            <button class="ui green button labeled icon playerSort" data-sort="asc" data-type="lastName">
 
-                    Games Won
-                </button>
-                <button class="ui green button labeled icon">
+                Last Name
+            </button>
 
-                    Games Lost
-                </button>
-            </div>
+
+            <button class="ui green button labeled icon playerSort" data-sort="asc" data-type="totalGames">
+                Total Games
+            </button>
+
+
+            <button class="ui green button labeled icon playerSort" data-sort="asc" data-type="gamesWon">
+
+                Games Won
+            </button>
+            <button class="ui green button labeled icon playerSort" data-sort="asc" data-type="gamesLost">
+
+                Games Lost
+            </button>
         </div>
+
 
     </section>
     <!--End Sort Grid-->
