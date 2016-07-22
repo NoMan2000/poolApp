@@ -2,7 +2,11 @@
 
 ##Goals:  
 
-Create a web app that tracks pool games and users.
+Create a web app that tracks pool games and users.  Ideally it can be used with only intermittent internet connection, so the database is stored locally, but can be exported to remote data storage that supports JSON-encoded storage.
+
+It is available as a heroku app for demo.
+
+[Heroku App](https://pool-app-node.herokuapp.com/)
 
 **Requirements:**
 
